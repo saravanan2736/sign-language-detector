@@ -1,6 +1,7 @@
 import os
 import json
 import torch
+import pandas as pd
 from torch.utils.data import Dataset
 from .preprocess import VideoProcessor
 
@@ -27,16 +28,31 @@ class WLASLDataset(Dataset):
         self.samples = self._load_samples()
 
     def _load_samples(self):
-        # We will parse the WLASL dataset metadata here to get the list of video paths 
-        # and their corresponding integer labels for the specified split.
+        # Parse the WLASL dataset metadata
+        csv_path = os.path.join(self.data_dir, "metadata", "wlasl100_available.csv")
+        
+        if not os.path.exists(csv_path):
+            raise FileNotFoundError(f"Metadata CSV not found at {csv_path}")
+            
+        df = pd.read_csv(csv_path)
+        
+        # Filter by requested split (train, val, test)
+        df = df[df['split'] == self.split]
         
         samples = []
-        # In a real implementation, we would parse `wlasl100_available.csv` here.
-        # Format might be: video_id, split, label
-        # Example dummy setup:
-        # samples.append({"path": os.path.join(self.data_dir, "raw", "001.mp4"), "label": 0})
+        for _, row in df.iterrows():
+            video_id = str(row['video_id']).zfill(5)
+            # Construct path to the raw video
+            video_path = os.path.join(self.data_dir, "raw", f"{video_id}.mp4")
+            
+            # Check if video actually exists before adding it
+            if os.path.exists(video_path):
+                samples.append({
+                    "path": video_path, 
+                    "label": int(row['class_index'])
+                })
         
-        print(f"Loaded {len(samples)} samples for split: {self.split}")
+        print(f"Loaded {len(samples)} valid samples for split: {self.split}")
         return samples
 
     def __len__(self):
