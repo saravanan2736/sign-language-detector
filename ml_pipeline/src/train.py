@@ -24,7 +24,7 @@ class TwoStreamModel(nn.Module):
         out = self.fusion(v_feat, s_feat)
         return out
 
-def train_one_epoch(model, dataloader, optimizer, criterion, device):
+def train_one_epoch(model, dataloader, optimizer, criterion, device, scaler):
     model.train()
     running_loss = 0.0
     correct = 0
@@ -38,13 +38,15 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device):
         
         optimizer.zero_grad()
         
-        # Forward pass
-        outputs = model(rgb_frames, skeletons)
-        loss = criterion(outputs, labels)
+        # Forward pass with Automatic Mixed Precision (AMP)
+        with torch.amp.autocast('cuda' if torch.cuda.is_available() else 'cpu'):
+            outputs = model(rgb_frames, skeletons)
+            loss = criterion(outputs, labels)
         
-        # Backward pass and optimize
-        loss.backward()
-        optimizer.step()
+        # Backward pass and optimize using the scaler
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
         
         # Calculate accuracy
         running_loss += loss.item()
@@ -78,11 +80,14 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
     
+    # Initialize Gradient Scaler for AMP
+    scaler = torch.amp.GradScaler('cuda' if torch.cuda.is_available() else 'cpu')
+    
     # 5. Training Loop
     num_epochs = 10
     for epoch in range(num_epochs):
         print(f"\nEpoch [{epoch+1}/{num_epochs}]")
-        train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion, device)
+        train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion, device, scaler)
         
         # In a full implementation, you would run a validation loop here and save best checkpoints
         print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}%")
