@@ -1,0 +1,20 @@
+# Ignore virtual environments
+venv/
+env/
+.venv/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore Next.js build (if present)
+.next/
+node_modules/
+
+# Ignore data folders to prevent large uploads
+data/raw/
+data/processed/
+
+# Ignore IDE files
+.vscode/
+.idea/

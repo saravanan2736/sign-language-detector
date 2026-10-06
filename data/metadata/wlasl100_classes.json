@@ -1,0 +1,502 @@
+[
+  {
+    "class_index": 0,
+    "gloss": "book",
+    "number_of_samples": 40
+  },
+  {
+    "class_index": 1,
+    "gloss": "drink",
+    "number_of_samples": 35
+  },
+  {
+    "class_index": 2,
+    "gloss": "computer",
+    "number_of_samples": 30
+  },
+  {
+    "class_index": 3,
+    "gloss": "before",
+    "number_of_samples": 26
+  },
+  {
+    "class_index": 4,
+    "gloss": "chair",
+    "number_of_samples": 26
+  },
+  {
+    "class_index": 5,
+    "gloss": "go",
+    "number_of_samples": 26
+  },
+  {
+    "class_index": 6,
+    "gloss": "clothes",
+    "number_of_samples": 25
+  },
+  {
+    "class_index": 7,
+    "gloss": "who",
+    "number_of_samples": 25
+  },
+  {
+    "class_index": 8,
+    "gloss": "candy",
+    "number_of_samples": 24
+  },
+  {
+    "class_index": 9,
+    "gloss": "cousin",
+    "number_of_samples": 23
+  },
+  {
+    "class_index": 10,
+    "gloss": "deaf",
+    "number_of_samples": 23
+  },
+  {
+    "class_index": 11,
+    "gloss": "fine",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 12,
+    "gloss": "help",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 13,
+    "gloss": "no",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 14,
+    "gloss": "thin",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 15,
+    "gloss": "walk",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 16,
+    "gloss": "year",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 17,
+    "gloss": "yes",
+    "number_of_samples": 22
+  },
+  {
+    "class_index": 18,
+    "gloss": "all",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 19,
+    "gloss": "black",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 20,
+    "gloss": "cool",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 21,
+    "gloss": "finish",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 22,
+    "gloss": "hot",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 23,
+    "gloss": "like",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 24,
+    "gloss": "many",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 25,
+    "gloss": "mother",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 26,
+    "gloss": "now",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 27,
+    "gloss": "orange",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 28,
+    "gloss": "table",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 29,
+    "gloss": "thanksgiving",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 30,
+    "gloss": "what",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 31,
+    "gloss": "woman",
+    "number_of_samples": 21
+  },
+  {
+    "class_index": 32,
+    "gloss": "bed",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 33,
+    "gloss": "blue",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 34,
+    "gloss": "bowling",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 35,
+    "gloss": "can",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 36,
+    "gloss": "dog",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 37,
+    "gloss": "family",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 38,
+    "gloss": "fish",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 39,
+    "gloss": "graduate",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 40,
+    "gloss": "hat",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 41,
+    "gloss": "hearing",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 42,
+    "gloss": "kiss",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 43,
+    "gloss": "language",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 44,
+    "gloss": "later",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 45,
+    "gloss": "man",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 46,
+    "gloss": "shirt",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 47,
+    "gloss": "study",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 48,
+    "gloss": "tall",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 49,
+    "gloss": "white",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 50,
+    "gloss": "wrong",
+    "number_of_samples": 20
+  },
+  {
+    "class_index": 51,
+    "gloss": "accident",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 52,
+    "gloss": "apple",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 53,
+    "gloss": "bird",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 54,
+    "gloss": "change",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 55,
+    "gloss": "color",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 56,
+    "gloss": "corn",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 57,
+    "gloss": "cow",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 58,
+    "gloss": "dance",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 59,
+    "gloss": "dark",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 60,
+    "gloss": "doctor",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 61,
+    "gloss": "eat",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 62,
+    "gloss": "enjoy",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 63,
+    "gloss": "forget",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 64,
+    "gloss": "give",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 65,
+    "gloss": "last",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 66,
+    "gloss": "meet",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 67,
+    "gloss": "pink",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 68,
+    "gloss": "pizza",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 69,
+    "gloss": "play",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 70,
+    "gloss": "school",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 71,
+    "gloss": "secretary",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 72,
+    "gloss": "short",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 73,
+    "gloss": "time",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 74,
+    "gloss": "want",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 75,
+    "gloss": "work",
+    "number_of_samples": 19
+  },
+  {
+    "class_index": 76,
+    "gloss": "africa",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 77,
+    "gloss": "basketball",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 78,
+    "gloss": "birthday",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 79,
+    "gloss": "brown",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 80,
+    "gloss": "but",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 81,
+    "gloss": "cheat",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 82,
+    "gloss": "city",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 83,
+    "gloss": "cook",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 84,
+    "gloss": "decide",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 85,
+    "gloss": "full",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 86,
+    "gloss": "how",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 87,
+    "gloss": "jacket",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 88,
+    "gloss": "letter",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 89,
+    "gloss": "medicine",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 90,
+    "gloss": "need",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 91,
+    "gloss": "paint",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 92,
+    "gloss": "paper",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 93,
+    "gloss": "pull",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 94,
+    "gloss": "purple",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 95,
+    "gloss": "right",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 96,
+    "gloss": "same",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 97,
+    "gloss": "son",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 98,
+    "gloss": "tell",
+    "number_of_samples": 18
+  },
+  {
+    "class_index": 99,
+    "gloss": "thursday",
+    "number_of_samples": 18
+  }
+]

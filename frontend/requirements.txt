@@ -1,0 +1,3 @@
+streamlit
+requests
+streamlit-webrtc # Helpful if they want actual webcam capture in streamlit later
