@@ -13,15 +13,14 @@ from models.fusion import MultiStreamFusion
 class TwoStreamModel(nn.Module):
     def __init__(self, num_classes=100):
         super(TwoStreamModel, self).__init__()
-        # Feature dimensions based on our previous implementations
-        self.i3d = VisualStreamI3D(feature_dim=512)
+        # Reverting to the ultra-fast Skeleton-Only mode
         self.st_gcn = SkeletalStreamSTGCN(feature_dim=256)
-        self.fusion = MultiStreamFusion(i3d_feature_dim=512, st_gcn_feature_dim=256, num_classes=num_classes)
+        self.classifier = nn.Linear(256, num_classes)
 
     def forward(self, rgb_input, skeletal_input):
-        v_feat = self.i3d(rgb_input)
+        # We completely ignore the massive rgb_input!
         s_feat = self.st_gcn(skeletal_input)
-        out = self.fusion(v_feat, s_feat)
+        out = self.classifier(s_feat)
         return out
 
 def train_one_epoch(model, dataloader, optimizer, criterion, device, scaler):
@@ -39,7 +38,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device, scaler):
         optimizer.zero_grad()
         
         # Forward pass with Automatic Mixed Precision (AMP)
-        with torch.amp.autocast('cuda' if torch.cuda.is_available() else 'cpu'):
+        with torch.amp.autocast(device.type):
             outputs = model(rgb_frames, skeletons)
             loss = criterion(outputs, labels)
         
@@ -59,13 +58,20 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device, scaler):
     return running_loss / len(dataloader), 100. * correct / total
 
 def main():
-    # 1. Device configuration
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using device: {device}")
+    # 1. Device configuration and diagnostics
+    print(f"PyTorch Version: {torch.__version__}")
+    print(f"CUDA Version: {torch.version.cuda}")
+    print(f"CUDA Available: {torch.cuda.is_available()}")
+    if torch.cuda.is_available():
+        print(f"GPU Name: {torch.cuda.get_device_name(0)}")
+        print(f"CUDA Compute Capability: {torch.cuda.get_device_capability(0)}")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Selected training device: {device}")
     
     # 2. DataLoaders
-    # Assuming the data folder is placed at the root level relative to ml_pipeline
-    data_dir = "../../data" 
+    # Assuming the data folder is placed at the root level relative to the execution directory
+    data_dir = "data" 
     train_dataset = WLASLDataset(data_dir=data_dir, split="train")
     
     # Num workers is 0 by default to prevent multiprocessing issues on Windows/small setups, 
@@ -81,10 +87,10 @@ def main():
     optimizer = AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
     
     # Initialize Gradient Scaler for AMP
-    scaler = torch.amp.GradScaler('cuda' if torch.cuda.is_available() else 'cpu')
+    scaler = torch.amp.GradScaler(device.type)
     
     # 5. Training Loop
-    num_epochs = 10
+    num_epochs = 100
     for epoch in range(num_epochs):
         print(f"\nEpoch [{epoch+1}/{num_epochs}]")
         train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion, device, scaler)
@@ -94,6 +100,9 @@ def main():
         
         # Save checkpoint
         torch.save(model.state_dict(), f"checkpoint_epoch_{epoch+1}.pth")
+
+    print("\nTraining Complete! Saving final checkpoint...")
+    torch.save(model.state_dict(), "checkpoint.pth")
 
 if __name__ == "__main__":
     main()

@@ -18,3 +18,7 @@ data/processed/
 # Ignore IDE files
 .vscode/
 .idea/
+
+# Ignore checkpoints and databases
+*.pth
+*.sqlite3

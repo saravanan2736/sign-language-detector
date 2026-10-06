@@ -1,6 +1,7 @@
 import os
 import json
 import torch
+import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from .preprocess import VideoProcessor
@@ -63,8 +64,18 @@ class WLASLDataset(Dataset):
         video_path = sample["path"]
         label = sample["label"]
         
-        # 1. Process Video -> returns NumPy arrays
-        frames_np, skeletons_np = self.processor.process_video(video_path)
+        vid_id = os.path.basename(video_path).split('.')[0]
+        proc_dir = os.path.join(self.data_dir, "processed")
+        frames_path = os.path.join(proc_dir, f"{vid_id}_frames.npy")
+        skeletons_path = os.path.join(proc_dir, f"{vid_id}_skeletons.npy")
+        
+        # 1. Load Pre-processed arrays if available (for lightning-fast training)
+        if os.path.exists(frames_path) and os.path.exists(skeletons_path):
+            frames_np = np.load(frames_path).astype(np.float32)
+            skeletons_np = np.load(skeletons_path).astype(np.float32)
+        else:
+            # Fallback to real-time CPU processing (used by FastAPI inference)
+            frames_np, skeletons_np = self.processor.process_video(video_path)
         
         # 2. Convert to PyTorch Tensors
         frames_tensor = torch.from_numpy(frames_np).float()
