@@ -9,7 +9,7 @@ import db_models as models
 
 # Add ml_pipeline to path so we can import our PyTorch models
 sys.path.append(os.path.join(os.path.dirname(__file__), '../ml_pipeline/src'))
-from train import TwoStreamModel
+from model_loader import load_inference_model
 from data.preprocess import VideoProcessor
 import torch
 import torch.nn.functional as F
@@ -22,11 +22,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Loading inference model on: {device}")
 
-model = TwoStreamModel(num_classes=100)
-# Use map_location to ensure it loads gracefully regardless of training device
-model.load_state_dict(torch.load(os.path.join(ROOT, "checkpoint.pth"), map_location=device, weights_only=True))
-model.to(device)
-model.eval()
+model, index_to_word = load_inference_model(ROOT, device)
 
 processor = VideoProcessor(target_frames=64, target_size=(224, 224))
 
@@ -44,16 +40,6 @@ app = FastAPI(
 def read_root():
     return {"message": "Sign Language Detector API is running"}
 
-import json
-
-# Load Vocabulary
-print("Loading vocabulary...")
-try:
-    with open(os.path.join(ROOT, "data", "metadata", "wlasl100_classes.json"), "r") as f:
-        vocab = json.load(f)
-        index_to_word = {item["class_index"]: item["gloss"] for item in vocab}
-except FileNotFoundError:
-    index_to_word = {}
 
 @app.post("/predict")
 async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_db)):

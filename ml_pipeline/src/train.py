@@ -103,15 +103,18 @@ def augment(x):
 
 
 class SkeletonSet(torch.utils.data.Dataset):
-    def __init__(self, data_dir, split, train=False):
+    def __init__(self, data_dir, split, train=False, words=None):
         import os, numpy as np, pandas as pd
         df = pd.read_csv(os.path.join(data_dir, "metadata", "wlasl100_available.csv"))
         df = df[df["split"] == split]
+        label_of = {w: i for i, w in enumerate(words)} if words else None
+        if words:
+            df = df[df["gloss"].isin(words)]
         self.x, self.y = [], []
         for _, r in df.iterrows():
             p = os.path.join(data_dir, "processed", f"{str(r['video_id']).zfill(5)}_skeletons.npy")
             if os.path.exists(p):
-                self.x.append(np.load(p).astype(np.float32)); self.y.append(int(r["class_index"]))
+                self.x.append(np.load(p).astype(np.float32)); self.y.append(label_of[r["gloss"]] if words else int(r["class_index"]))
         self.train = train
         print(f"{split}: {len(self.x)} samples")
 
@@ -134,17 +137,21 @@ def evaluate(model, loader, device):
 
 
 def main():
-    import os
+    import os, sys, json
+    # Optional: python train.py demo  -> trains a small model on data/metadata/demo_words.json
+    demo = len(sys.argv) > 1 and sys.argv[1] == "demo"
+    words = json.load(open("data/metadata/demo_words.json")) if demo else None
+    out_path = "checkpoints/demo.pth" if demo else "checkpoints/best.pth"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Selected training device: {device}")
     data_dir = "data"
-    train_loader = DataLoader(SkeletonSet(data_dir, "train", train=True), batch_size=32, shuffle=True)
-    val_loader = DataLoader(SkeletonSet(data_dir, "val"), batch_size=64)
+    train_loader = DataLoader(SkeletonSet(data_dir, "train", train=True, words=words), batch_size=32, shuffle=True)
+    val_loader = DataLoader(SkeletonSet(data_dir, "val", words=words), batch_size=64)
 
-    model = TwoStreamModel(num_classes=100).to(device)
+    model = TwoStreamModel(num_classes=len(words) if demo else 100).to(device)
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=1e-2)
-    num_epochs, patience = 150, 30
+    num_epochs, patience = 150, 40
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, num_epochs)
     scaler = torch.amp.GradScaler(device.type)
 
@@ -157,12 +164,12 @@ def main():
         print(f"Epoch {epoch+1}/{num_epochs} | loss {train_loss:.3f} | train {train_acc:.1f}% | val {val_acc:.1f}%")
         if val_acc > best:
             best, bad = val_acc, 0
-            torch.save(model.state_dict(), "checkpoints/best.pth")
+            torch.save(model.state_dict(), out_path)
         else:
             bad += 1
             if bad >= patience:
                 print("Early stopping"); break
-    print(f"Best val acc: {best:.2f}% (saved to checkpoints/best.pth)")
+    print(f"Best val acc: {best:.2f}% (saved to {out_path})")
 
 if __name__ == "__main__":
     main()

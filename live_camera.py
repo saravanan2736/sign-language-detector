@@ -8,14 +8,11 @@ import os
 
 # Add pipeline to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'ml_pipeline/src'))
-from train import TwoStreamModel
+from model_loader import load_inference_model
 
 print("Initializing PyTorch and MediaPipe...")
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = TwoStreamModel(num_classes=100)
-model.load_state_dict(torch.load("checkpoint.pth", map_location=device, weights_only=True))
-model.to(device)
-model.eval()
+model, index_to_word = load_inference_model(os.path.dirname(os.path.abspath(__file__)), device)
 
 mp_pose = mp.solutions.pose.Pose(static_image_mode=False, min_detection_confidence=0.5)
 mp_hands = mp.solutions.hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5)
@@ -48,12 +45,6 @@ def extract_landmarks(pose_results, hand_results):
     landmarks.extend(right_hand)
     return np.array(landmarks, dtype=np.float32)
 
-import json
-
-print("Loading vocabulary...")
-with open("data/metadata/wlasl100_classes.json", "r") as f:
-    vocab = json.load(f)
-    index_to_word = {item["class_index"]: item["gloss"] for item in vocab}
 
 print("Starting Webcam...")
 cap = cv2.VideoCapture(0)

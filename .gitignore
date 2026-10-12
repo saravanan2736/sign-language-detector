@@ -25,3 +25,6 @@ data/processed/
 *.sqlite3
 checkpoints/
 checkpoint_epoch_*.pth
+!checkpoints/
+checkpoints/*
+!checkpoints/demo.pth

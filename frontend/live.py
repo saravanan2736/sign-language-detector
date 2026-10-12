@@ -14,7 +14,7 @@ import torch.nn.functional as F
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(os.path.join(ROOT, "ml_pipeline", "src"))
-from train import TwoStreamModel  # noqa: E402
+from model_loader import load_inference_model  # noqa: E402
 
 WINDOW = 64
 INFER_EVERY = 15
@@ -23,11 +23,7 @@ INFER_EVERY = 15
 @st.cache_resource
 def load_model():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = TwoStreamModel(num_classes=100)
-    model.load_state_dict(torch.load(os.path.join(ROOT, "checkpoint.pth"), map_location=device, weights_only=True))
-    model.to(device).eval()
-    with open(os.path.join(ROOT, "data", "metadata", "wlasl100_classes.json")) as f:
-        vocab = {i["class_index"]: i["gloss"] for i in json.load(f)}
+    model, vocab = load_inference_model(ROOT, device)
     return model, device, vocab
 
 
