@@ -150,10 +150,12 @@ def evaluate(model, loader, device):
 
 def main():
     import os, sys, json
-    # Optional: python train.py demo  -> trains a small model on data/metadata/demo_words.json
+    # Optional: python train.py demo [words.json] [out.pth]
+    #   -> trains a small model (default: data/metadata/demo_words.json -> checkpoints/demo.pth)
     demo = len(sys.argv) > 1 and sys.argv[1] == "demo"
-    words = json.load(open("data/metadata/demo_words.json")) if demo else None
-    out_path = "checkpoints/demo.pth" if demo else "checkpoints/best.pth"
+    words_file = sys.argv[2] if len(sys.argv) > 2 else "data/metadata/demo_words.json"
+    words = json.load(open(words_file)) if demo else None
+    out_path = (sys.argv[3] if len(sys.argv) > 3 else "checkpoints/demo.pth") if demo else "checkpoints/best.pth"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Selected training device: {device}")
     data_dir = "data"
