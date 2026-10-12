@@ -115,6 +115,18 @@ class SkeletonSet(torch.utils.data.Dataset):
             p = os.path.join(data_dir, "processed", f"{str(r['video_id']).zfill(5)}_skeletons.npy")
             if os.path.exists(p):
                 self.x.append(np.load(p).astype(np.float32)); self.y.append(label_of[r["gloss"]] if words else int(r["class_index"]))
+        # Your own webcam recordings (data/own/<word>_<k>.npy): every 4th goes to val, the rest to train
+        if words:
+            import glob
+            for f in sorted(glob.glob(os.path.join(data_dir, "own", "*.npy"))):
+                w, k = os.path.basename(f)[:-4].rsplit("_", 1)
+                if w not in label_of:
+                    continue
+                is_val = int(k) % 4 == 0
+                if (split == "val") == is_val and split in ("train", "val"):
+                    reps = 3 if split == "train" else 1   # oversample your own takes
+                    for _ in range(reps):
+                        self.x.append(np.load(f).astype(np.float32)); self.y.append(label_of[w])
         self.train = train
         print(f"{split}: {len(self.x)} samples")
 
