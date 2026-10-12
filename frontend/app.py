@@ -21,46 +21,72 @@ if torch.cuda.is_available():
 
 st.sidebar.header("Instructions")
 st.sidebar.markdown(
-    "1. For Video Uploads: Use this web app.\n"
-    "2. For Live Webcam Demo: Use the native `live_camera.py` script for zero lag!"
+    "1. **Upload video**: predict a sign from a recorded clip.\n"
+    "2. **Live webcam**: real-time recognition in the browser "
+    "(`python live_camera.py` is smoother)."
 )
 
 # --- Main UI ---
 st.title("WLASL-100 ASL Recognition")
-st.write("Upload an ASL video clip, and the AI will predict the sign.")
+tab_upload, tab_live = st.tabs(["Upload video", "Live webcam"])
 
-col1, col2 = st.columns([3, 2])
+with tab_upload:
+    st.write("Upload an ASL video clip, and the AI will predict the sign.")
 
-with col1:
-    uploaded_file = st.file_uploader("Upload an isolated sign video", type=["mp4", "avi", "mov", "webm"])
-    if uploaded_file is not None:
-        st.video(uploaded_file)
+    col1, col2 = st.columns([3, 2])
 
-with col2:
-    if uploaded_file is not None:
-        if st.button("Predict Sign", use_container_width=True):
-            with st.spinner("Processing video and extracting features..."):
-                try:
-                    files = {"video": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
-                    response = requests.post(f"{BACKEND_URL}/predict", files=files)
+    with col1:
+        uploaded_file = st.file_uploader("Upload an isolated sign video", type=["mp4", "avi", "mov", "webm"])
+        if uploaded_file is not None:
+            st.video(uploaded_file)
+
+    with col2:
+        if uploaded_file is not None:
+            if st.button("Predict Sign", use_container_width=True):
+                with st.spinner("Processing video and extracting features..."):
+                    try:
+                        files = {"video": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+                        response = requests.post(f"{BACKEND_URL}/predict", files=files)
                     
-                    if response.status_code == 200:
-                        result = response.json()
-                        st.success("Prediction Complete!")
-                        st.markdown(f"### Predicted Word: **{result.get('predicted_word', 'Unknown').upper()}**")
-                        st.progress(min(result.get('score', 0), 1.0))
-                        st.write(f"Confidence Score: {result.get('score', 0) * 100:.1f}%")
-                        st.markdown("**Top 5 predictions**")
-                        for item in result.get("top5", []):
-                            st.write(f"{item['word'].upper()} - {item['score'] * 100:.1f}%")
-                            st.progress(min(item["score"], 1.0))
-                    else:
-                        detail = response.json().get("detail", response.status_code)
-                        st.error(f"Error from backend: {detail}")
-                except Exception as e:
-                    st.error("Could not connect to backend. Make sure FastAPI is running!")
+                        if response.status_code == 200:
+                            result = response.json()
+                            st.success("Prediction Complete!")
+                            st.markdown(f"### Predicted Word: **{result.get('predicted_word', 'Unknown').upper()}**")
+                            st.progress(min(result.get('score', 0), 1.0))
+                            st.write(f"Confidence Score: {result.get('score', 0) * 100:.1f}%")
+                            st.markdown("**Top 5 predictions**")
+                            for item in result.get("top5", []):
+                                st.write(f"{item['word'].upper()} - {item['score'] * 100:.1f}%")
+                                st.progress(min(item["score"], 1.0))
+                        else:
+                            detail = response.json().get("detail", response.status_code)
+                            st.error(f"Error from backend: {detail}")
+                    except Exception as e:
+                        st.error("Could not connect to backend. Make sure FastAPI is running!")
 
-st.divider()
-st.subheader("⚠️ For Live Webcam Demonstration")
-st.info("Streamlit is known to severely lag when forcing live video through a web browser. To show off a perfectly smooth, zero-lag Real-Time Demo to your professors, run the native camera script!")
-st.code("python live_camera.py", language="powershell")
+
+with tab_live:
+    st.write("Allow camera access, press START, and sign in front of the camera. "
+             "Predictions appear after ~64 frames (about 2 seconds).")
+    try:
+        import time
+        from streamlit_webrtc import webrtc_streamer
+        from live import LiveRecognizer, load_model
+
+        model, device, vocab = load_model()
+        recognizer = st.session_state.setdefault("recognizer", LiveRecognizer(model, device, vocab))
+        ctx = webrtc_streamer(
+            key="live-asl",
+            video_frame_callback=recognizer.callback,
+            media_stream_constraints={"video": True, "audio": False},
+            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+        )
+        box = st.empty()
+        while ctx.state.playing:
+            top5 = recognizer.get_top5()
+            if top5:
+                lines = [f"- {w.upper()} - {p * 100:.1f}%" for w, p in top5]
+                box.markdown("**Top 5**\n\n" + "\n".join(lines))
+            time.sleep(0.3)
+    except ImportError:
+        st.error("Install streamlit-webrtc: pip install streamlit-webrtc")

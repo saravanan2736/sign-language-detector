@@ -1,3 +1,4 @@
 streamlit
 requests
-streamlit-webrtc # Helpful if they want actual webcam capture in streamlit later
+streamlit-webrtc
+protobuf>=4.25.3,<5  # mediapipe requires protobuf<5
