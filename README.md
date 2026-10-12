@@ -71,3 +71,6 @@ streamlit run app.py
 *(The frontend will open in your browser at `http://localhost:8501`)*
 
 Now you can upload video clips in the browser and the app will predict the signs!
+
+## Evaluation
+Run `python evaluate.py`. Current skeleton-only model on WLASL-100: test top-1 17.2%, top-5 42.0%, macro-F1 0.14 (see `docs/eval_results.json`). Retrain with `python ml_pipeline/src/train.py` (run from the project root; needs `data/processed`). Tests: `pytest tests`.

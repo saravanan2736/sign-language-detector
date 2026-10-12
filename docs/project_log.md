@@ -21,6 +21,13 @@ This file documents the steps taken during the implementation of the Sign Langua
 - **Optimized for 8GB VRAM**: Added `torch.amp.autocast` and `GradScaler` to use Mixed Precision Training, halving memory usage for the network activations.
 
 ## Phase 4: API Backend & Database (In Progress)
-- Created `backend/database.py`: Set up SQLAlchemy connection string targeting a PostgreSQL database (`postgresql://postgres:password@localhost/signdb`).
-- Created `backend/models.py`: Added the `RecognitionHistory` ORM model.
+- Created `backend/database.py`: Set up SQLAlchemy connection string using SQLite (`signdb.sqlite3`; PostgreSQL URL left commented in the file).
+- Created `backend/db_models.py`: Added the `RecognitionHistory` ORM model.
 - Updated `backend/main.py`: Imported the database engine to auto-create tables on startup. Injected the database session as a dependency in `/predict` to log history on each inference call.
+
+## Phase 5: Evaluation & Fixes
+- Added `evaluate.py` (top-1/top-5/macro-F1 on train/val/test; writes `docs/eval_results.json`).
+- Found severe overfitting in the first model (train 96.5% vs test 8.3%).
+- Retrained skeleton-only model (`train.py`): shoulder-centred/scaled normalisation inside the model, velocity and hand-local features (9 channels), augmentation, dropout, label smoothing, val-based best checkpoint + early stopping.
+- Result: test top-1 17.2%, top-5 42.0% (val 33.2%). Small dataset (~7 clips/sign) limits accuracy; RGB stream is not used.
+- Backend: path fixes, error handling (422 when nothing detected), `GET /history`. Added `tests/`.

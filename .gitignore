@@ -23,3 +23,5 @@ data/processed/
 *.pth
 !checkpoint.pth
 *.sqlite3
+checkpoints/
+checkpoint_epoch_*.pth

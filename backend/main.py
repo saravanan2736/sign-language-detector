@@ -1,6 +1,6 @@
 import sys
 import os
-from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uvicorn
 
@@ -16,13 +16,15 @@ import torch.nn.functional as F
 import tempfile
 import os
 
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 # --- 0. Load Model on Startup ---
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Loading inference model on: {device}")
 
 model = TwoStreamModel(num_classes=100)
 # Use map_location to ensure it loads gracefully regardless of training device
-model.load_state_dict(torch.load("../checkpoint.pth", map_location=device, weights_only=True))
+model.load_state_dict(torch.load(os.path.join(ROOT, "checkpoint.pth"), map_location=device, weights_only=True))
 model.to(device)
 model.eval()
 
@@ -47,7 +49,7 @@ import json
 # Load Vocabulary
 print("Loading vocabulary...")
 try:
-    with open("../data/metadata/wlasl100_classes.json", "r") as f:
+    with open(os.path.join(ROOT, "data", "metadata", "wlasl100_classes.json"), "r") as f:
         vocab = json.load(f)
         index_to_word = {item["class_index"]: item["gloss"] for item in vocab}
 except FileNotFoundError:
@@ -63,8 +65,13 @@ async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_
 
     try:
         frames_np, skeletons_np = processor.process_video(temp_video_path)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read the uploaded video")
     finally:
         os.remove(temp_video_path)
+
+    if not skeletons_np.any():
+        raise HTTPException(status_code=422, detail="No person/hands detected in the video")
         
     # Format tensors: add batch dimension (B, C, T, H, W)
     frames_t = torch.tensor(frames_np).unsqueeze(0).to(device)
@@ -99,6 +106,13 @@ async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_
         "model_version": version,
         "record_id": history_record.id
     }
+
+@app.get("/history")
+def get_history(limit: int = 20, db: Session = Depends(get_db)):
+    rows = (db.query(models.RecognitionHistory)
+              .order_by(models.RecognitionHistory.id.desc()).limit(limit).all())
+    return [{"id": r.id, "predicted_word": r.predicted_label,
+             "score": r.confidence_score, "model_version": r.model_version} for r in rows]
 
 
 if __name__ == "__main__":
