@@ -83,6 +83,9 @@ async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_
         probabilities = F.softmax(outputs, dim=1)
         max_prob, predicted_idx = torch.max(probabilities, 1)
         
+    top_p, top_i = torch.topk(probabilities[0], 5)
+    top5 = [{"word": index_to_word.get(int(i), f"WordClass_{int(i)}"), "score": float(v)}
+            for v, i in zip(top_p, top_i)]
     confidence = max_prob.item()
     predicted_class = int(predicted_idx.item())
     
@@ -103,6 +106,7 @@ async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_
     return {
         "predicted_word": predicted_word,
         "score": confidence,
+        "top5": top5,
         "model_version": version,
         "record_id": history_record.id
     }

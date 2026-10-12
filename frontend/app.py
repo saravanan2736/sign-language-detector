@@ -50,8 +50,13 @@ with col2:
                         st.markdown(f"### Predicted Word: **{result.get('predicted_word', 'Unknown').upper()}**")
                         st.progress(min(result.get('score', 0), 1.0))
                         st.write(f"Confidence Score: {result.get('score', 0) * 100:.1f}%")
+                        st.markdown("**Top 5 predictions**")
+                        for item in result.get("top5", []):
+                            st.write(f"{item['word'].upper()} - {item['score'] * 100:.1f}%")
+                            st.progress(min(item["score"], 1.0))
                     else:
-                        st.error(f"Error from backend: {response.status_code}")
+                        detail = response.json().get("detail", response.status_code)
+                        st.error(f"Error from backend: {detail}")
                 except Exception as e:
                     st.error("Could not connect to backend. Make sure FastAPI is running!")
 
