@@ -75,18 +75,35 @@ with tab_live:
 
         model, device, vocab = load_model()
         recognizer = st.session_state.setdefault("recognizer", LiveRecognizer(model, device, vocab))
-        ctx = webrtc_streamer(
-            key="live-asl",
-            video_frame_callback=recognizer.callback,
-            media_stream_constraints={"video": True, "audio": False},
-            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+        # Keep the camera small so the predictions stay visible beside it
+        st.markdown(
+            "<style>div[data-testid='stVideo'] video, .stVideo video {max-height: 320px; width: 100%; object-fit: contain;}"
+            " video {max-height: 320px;}</style>",
+            unsafe_allow_html=True,
         )
-        box = st.empty()
+        cam_col, pred_col = st.columns([2, 3])
+        with cam_col:
+            ctx = webrtc_streamer(
+                key="live-asl",
+                video_frame_callback=recognizer.callback,
+                media_stream_constraints={
+                    "video": {"width": {"ideal": 640}, "height": {"ideal": 480}, "frameRate": {"ideal": 24}},
+                    "audio": False,
+                },
+                rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+            )
+        with pred_col:
+            st.markdown("**Predictions**")
+            box = st.empty()
+            box.info("Press START and sign. Results appear here after ~2 seconds.")
         while ctx.state.playing:
             top5 = recognizer.get_top5()
             if top5:
-                lines = [f"- {w.upper()} - {p * 100:.1f}%" for w, p in top5]
-                box.markdown("**Top 5**\n\n" + "\n".join(lines))
-            time.sleep(0.3)
+                with box.container():
+                    st.markdown(f"### {top5[0][0].upper()}  ({top5[0][1] * 100:.0f}%)")
+                    for w, p in top5:
+                        st.write(f"{w.upper()} - {p * 100:.1f}%")
+                        st.progress(min(p, 1.0))
+            time.sleep(0.5)
     except ImportError:
         st.error("Install streamlit-webrtc: pip install streamlit-webrtc")
