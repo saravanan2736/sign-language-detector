@@ -112,6 +112,8 @@ while cap.isOpened():
             outputs = model(frames_t, skeletons_t)
             probs = F.softmax(outputs, dim=1)
             max_prob, predicted_idx = torch.max(probs, 1)
+            top_p, top_i = torch.topk(probs[0], 3)
+            top_line = ' | '.join(f"{index_to_word.get(int(i), '?')} {v:.2f}" for v, i in zip(top_p, top_i))
             
             if max_prob.item() > 0.01:
                 predicted_word = index_to_word.get(predicted_idx.item(), "Unknown").upper()
@@ -119,6 +121,8 @@ while cap.isOpened():
             
     # Draw prediction on screen
     cv2.putText(frame, current_prediction, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_AA)
+    if 'top_line' in globals():
+        cv2.putText(frame, 'Top3: ' + top_line, (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2, cv2.LINE_AA)
     cv2.putText(frame, "Press 'Q' to quit", (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     
     cv2.imshow('Real-Time ASL Detector', frame)
