@@ -2,25 +2,32 @@ import type { Guess } from "@/lib/api";
 
 export default function Results({ top5 }: { top5: Guess[] }) {
   if (!top5.length) return null;
-  const [best, ...rest] = top5;
+  const best = top5[0];
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-sm text-neutral-500">Best guess</p>
-        <p className="text-4xl font-semibold tracking-tight uppercase">{best.word}</p>
-        <p className="text-sm text-neutral-500">{(best.score * 100).toFixed(1)}% confidence</p>
+    <div className="fade-up space-y-5" key={best.word + best.score}>
+      <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] p-5 text-white shadow-lg shadow-indigo-300/40">
+        <p className="text-xs uppercase tracking-wide text-white/75">Best guess</p>
+        <p className="mt-1 text-4xl font-semibold uppercase tracking-tight">{best.word}</p>
+        <p className="mt-1 text-sm text-white/80">{(best.score * 100).toFixed(1)}% confidence</p>
       </div>
-      <ul className="space-y-2">
-        {[best, ...rest].map((g, i) => (
+      <ul className="space-y-3">
+        {top5.map((g, i) => (
           <li key={g.word + i} className="text-sm">
-            <div className="flex justify-between">
-              <span className="uppercase">{g.word}</span>
-              <span className="tabular-nums text-neutral-500">{(g.score * 100).toFixed(1)}%</span>
+            <div className="mb-1 flex justify-between">
+              <span className="font-medium uppercase">{g.word}</span>
+              <span className="tabular-nums text-[var(--muted)]">{(g.score * 100).toFixed(1)}%</span>
             </div>
-            <div className="h-1.5 rounded bg-neutral-200 dark:bg-neutral-800">
+            <div className="bar-track">
               <div
-                className={`h-1.5 rounded ${i === 0 ? "bg-emerald-600" : "bg-neutral-400"}`}
-                style={{ width: `${Math.max(2, g.score * 100)}%` }}
+                className="bar-fill"
+                style={{
+                  width: `${Math.max(2, g.score * 100)}%`,
+                  animationDelay: `${i * 70}ms`,
+                  background:
+                    i === 0
+                      ? "linear-gradient(90deg, var(--accent), var(--accent-2))"
+                      : "linear-gradient(90deg, #a5b4fc, #c4b5fd)",
+                }}
               />
             </div>
           </li>

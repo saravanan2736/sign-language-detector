@@ -207,7 +207,7 @@ export default function Live() {
   return (
     <div className="grid gap-8 md:grid-cols-[minmax(0,320px)_1fr]">
       <div className="space-y-3">
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-neutral-900">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg">
           <video
             ref={videoRef}
             playsInline
@@ -216,33 +216,31 @@ export default function Live() {
           />
           <canvas ref={canvasRef} className="absolute inset-0 h-full w-full -scale-x-100 object-cover" />
           {recording && (
-            <span className="absolute left-2 top-2 rounded bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
+            <span className="rec-pulse absolute left-2 top-2 rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-medium text-white">
               REC
             </span>
           )}
           {status === "running" && (
-            <span className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">
+            <span className="absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-0.5 text-xs text-white backdrop-blur">
               {handsSeen ? "Hands detected" : "No hands in view"}
             </span>
           )}
         </div>
 
         {status === "idle" && (
-          <button onClick={start} className="w-full rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white">
+          <button onClick={start} className="btn btn-primary w-full">
             Start camera
           </button>
         )}
-        {status === "loading" && <p className="text-sm text-neutral-500">Loading hand and pose models...</p>}
+        {status === "loading" && <p className="flex items-center gap-2 text-sm text-[var(--muted)]"><span className="spinner !border-indigo-200 !border-t-indigo-500" />Loading hand and pose models...</p>}
         {status === "running" && (
           <>
-            <div className="flex gap-2 text-sm">
+            <div className="flex gap-2">
               {(["record", "continuous"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`flex-1 rounded border px-3 py-1.5 ${
-                    mode === m ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900" : ""
-                  }`}
+                  className={`btn flex-1 ${mode === m ? "btn-active" : "btn-ghost"}`}
                 >
                   {m === "record" ? "Record a sign" : "Continuous"}
                 </button>
@@ -251,26 +249,24 @@ export default function Live() {
             {mode === "record" && (
               <button
                 onClick={toggleRecord}
-                className={`w-full rounded px-4 py-2 text-sm font-medium text-white ${
-                  recording ? "bg-red-600" : "bg-emerald-600"
-                }`}
+                className={`btn w-full ${recording ? "btn-danger rec-pulse" : "btn-primary"}`}
               >
                 {recording ? "Stop and predict" : "Start recording"}
               </button>
             )}
-            <button onClick={stop} className="w-full rounded border px-4 py-2 text-sm">
+            <button onClick={stop} className="btn btn-ghost w-full">
               Stop camera
             </button>
           </>
         )}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
       </div>
 
       <div>
         {result ? (
           <Results top5={result.top5} />
         ) : (
-          <p className="text-sm text-neutral-500">
+          <p className="grid h-full min-h-40 place-items-center rounded-2xl bg-white/40 p-6 text-center text-sm text-[var(--muted)]">
             {status === "running"
               ? mode === "record"
                 ? "Press Start recording, make one sign, then press Stop and predict."

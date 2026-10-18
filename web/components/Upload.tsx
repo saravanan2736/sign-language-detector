@@ -34,27 +34,35 @@ export default function Upload() {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div className="space-y-4">
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => {
-            setFile(e.target.files?.[0] ?? null);
-            setResult(null);
-            setError(null);
-          }}
-          className="block w-full text-sm file:mr-3 file:rounded file:border-0 file:bg-neutral-900 file:px-3 file:py-2 file:text-white dark:file:bg-neutral-100 dark:file:text-neutral-900"
-        />
-        {url && <video src={url} controls className="max-h-72 w-full rounded bg-black" />}
-        <button
-          onClick={run}
-          disabled={!file || busy}
-          className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
-        >
+        <label className="block rounded-2xl border-2 border-dashed border-indigo-200 bg-white/50 p-4 text-sm text-[var(--muted)] transition-colors hover:border-indigo-400 hover:bg-white/80">
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null);
+              setResult(null);
+              setError(null);
+            }}
+            className="file-input block w-full text-sm"
+          />
+          <span className="mt-2 block text-xs">{file ? file.name : "Choose a short clip of one sign (mp4, mov, webm)"}</span>
+        </label>
+        {url && <video src={url} controls className="max-h-72 w-full rounded-2xl bg-black shadow-md" />}
+        <button onClick={run} disabled={!file || busy} className="btn btn-primary">
+          {busy && <span className="spinner" />}
           {busy ? "Analysing..." : "Predict sign"}
         </button>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
       </div>
-      <div>{result ? <Results top5={result.top5} /> : <p className="text-sm text-neutral-500">Upload a short clip of one sign.</p>}</div>
+      <div>
+        {result ? (
+          <Results top5={result.top5} />
+        ) : (
+          <div className="grid h-full min-h-40 place-items-center rounded-2xl bg-white/40 p-6 text-center text-sm text-[var(--muted)]">
+            Results will appear here
+          </div>
+        )}
+      </div>
     </div>
   );
 }
