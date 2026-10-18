@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #1e2a3b;
-  --muted: #64748b;
-  --accent: #5b6cf0;
-  --accent-2: #8b5cf6;
-  --ok: #22b8a0;
-  --card: rgba(255, 255, 255, 0.62);
-  --card-border: rgba(255, 255, 255, 0.8);
-  --shadow: 0 10px 30px -12px rgba(60, 72, 140, 0.25);
+  --ink: #e8ecf8;
+  --muted: #94a3b8;
+  --accent: #6d7cff;
+  --accent-2: #9b6bff;
+  --accent-text: #b4bcff;
+  --ok: #34d3b4;
+  --card: rgba(20, 27, 54, 0.58);
+  --card-border: rgba(255, 255, 255, 0.09);
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --line: rgba(255, 255, 255, 0.08);
+  --shadow: 0 14px 40px -14px rgba(0, 0, 0, 0.6);
 }
 
 @theme inline {
@@ -18,19 +22,19 @@
 
 html {
   scrollbar-gutter: stable;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
   color: var(--ink);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   min-height: 100vh;
-  background-color: #eef1ff;
+  background-color: #0a0f1f;
   background-image:
-    radial-gradient(60% 55% at 12% 18%, #dcd6ff 0%, transparent 70%),
-    radial-gradient(55% 50% at 88% 12%, #cfe9ff 0%, transparent 70%),
-    radial-gradient(60% 55% at 80% 90%, #d5f5e8 0%, transparent 70%),
-    radial-gradient(55% 50% at 15% 88%, #ffe5d6 0%, transparent 70%);
+    radial-gradient(60% 55% at 12% 18%, rgba(88, 70, 200, 0.55) 0%, transparent 70%),
+    radial-gradient(55% 50% at 88% 12%, rgba(30, 100, 170, 0.5) 0%, transparent 70%),
+    radial-gradient(60% 55% at 80% 90%, rgba(20, 130, 120, 0.42) 0%, transparent 70%),
+    radial-gradient(55% 50% at 15% 88%, rgba(150, 60, 140, 0.4) 0%, transparent 70%);
   background-size: 160% 160%;
   background-attachment: fixed;
   animation: drift 28s ease-in-out infinite alternate;
@@ -114,11 +118,11 @@ body {
 .btn-primary {
   color: #fff;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 8px 20px -8px rgba(91, 108, 240, 0.7);
+  box-shadow: 0 8px 22px -8px rgba(109, 124, 255, 0.65);
 }
 
 .btn-primary:hover:not(:disabled) {
-  box-shadow: 0 14px 28px -10px rgba(91, 108, 240, 0.85);
+  box-shadow: 0 14px 30px -10px rgba(109, 124, 255, 0.85);
 }
 
 /* light sweep on hover */
@@ -143,18 +147,18 @@ body {
 
 .btn-ghost {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 14px -8px rgba(60, 72, 140, 0.3);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .btn-active {
   color: #fff;
-  background: var(--ink);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 /* pulsing ring while recording */
@@ -191,7 +195,7 @@ body {
 .bar-track {
   height: 0.5rem;
   border-radius: 999px;
-  background: rgba(100, 116, 139, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 

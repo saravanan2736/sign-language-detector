@@ -80,7 +80,7 @@ export default function Home() {
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5 p-4 md:flex-row md:p-6">
       <aside className="card flex shrink-0 flex-col gap-6 p-4 md:sticky md:top-6 md:h-[calc(100vh-3rem)] md:w-64">
         <div className="flex items-center gap-3 px-2 pt-1">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-white shadow-lg shadow-indigo-300/50">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-white shadow-lg shadow-indigo-500/40">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12m0-1V4.5a1.5 1.5 0 0 1 3 0V12m0-6.5a1.5 1.5 0 0 1 3 0V13m0-4.5a1.5 1.5 0 0 1 3 0V15a7 7 0 0 1-7 7h-1a7 7 0 0 1-5.6-2.8L4 15.5a1.6 1.6 0 0 1 2.4-2L8 15" />
             </svg>
@@ -100,11 +100,11 @@ export default function Home() {
                 onClick={() => setTab(t.id)}
                 className={`group flex flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 md:flex-none ${
                   active
-                    ? "bg-white text-[var(--accent)] shadow-md shadow-indigo-200/60"
-                    : "text-[var(--muted)] hover:translate-x-0.5 hover:bg-white/60 hover:text-[var(--ink)]"
+                    ? "bg-white/10 text-white shadow-md shadow-black/30 ring-1 ring-white/10"
+                    : "text-[var(--muted)] hover:translate-x-0.5 hover:bg-[var(--surface)] hover:text-[var(--ink)]"
                 }`}
               >
-                <span className={`transition-transform duration-200 group-hover:scale-110 ${active ? "text-[var(--accent)]" : ""}`}>
+                <span className={`transition-transform duration-200 group-hover:scale-110 ${active ? "text-[var(--accent-text)]" : ""}`}>
                   {t.icon}
                 </span>
                 <span className="font-medium">{t.label}</span>
@@ -117,7 +117,7 @@ export default function Home() {
           <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">Words it knows</p>
           <div className="flex flex-wrap gap-1.5 px-1">
             {WORDS.map((w) => (
-              <span key={w} className="rounded-full bg-white/70 px-2.5 py-1 text-xs text-[var(--ink)] transition-transform hover:-translate-y-0.5">
+              <span key={w} className="rounded-full bg-[var(--surface-hover)] px-2.5 py-1 text-xs text-[var(--ink)] transition-transform hover:-translate-y-0.5">
                 {w}
               </span>
             ))}

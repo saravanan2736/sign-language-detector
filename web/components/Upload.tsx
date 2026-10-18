@@ -34,7 +34,7 @@ export default function Upload() {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div className="space-y-4">
-        <label className="block rounded-2xl border-2 border-dashed border-indigo-200 bg-white/50 p-4 text-sm text-[var(--muted)] transition-colors hover:border-indigo-400 hover:bg-white/80">
+        <label className="block rounded-2xl border-2 border-dashed border-indigo-300/30 bg-[var(--surface)] p-4 text-sm text-[var(--muted)] transition-colors hover:border-indigo-300/70 hover:bg-[var(--surface-hover)]">
           <input
             type="file"
             accept="video/*"
@@ -52,13 +52,13 @@ export default function Upload() {
           {busy && <span className="spinner" />}
           {busy ? "Analysing..." : "Predict sign"}
         </button>
-        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
+        {error && <p className="rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-300">{error}</p>}
       </div>
       <div>
         {result ? (
           <Results top5={result.top5} />
         ) : (
-          <div className="grid h-full min-h-40 place-items-center rounded-2xl bg-white/40 p-6 text-center text-sm text-[var(--muted)]">
+          <div className="grid h-full min-h-40 place-items-center rounded-2xl bg-[var(--surface)] p-6 text-center text-sm text-[var(--muted)]">
             Results will appear here
           </div>
         )}

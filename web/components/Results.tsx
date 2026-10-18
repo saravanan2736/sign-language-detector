@@ -5,7 +5,7 @@ export default function Results({ top5 }: { top5: Guess[] }) {
   const best = top5[0];
   return (
     <div className="fade-up space-y-5" key={best.word + best.score}>
-      <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] p-5 text-white shadow-lg shadow-indigo-300/40">
+      <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] p-5 text-white shadow-lg shadow-indigo-500/30">
         <p className="text-xs uppercase tracking-wide text-white/75">Best guess</p>
         <p className="mt-1 text-4xl font-semibold uppercase tracking-tight">{best.word}</p>
         <p className="mt-1 text-sm text-white/80">{(best.score * 100).toFixed(1)}% confidence</p>
@@ -26,7 +26,7 @@ export default function Results({ top5 }: { top5: Guess[] }) {
                   background:
                     i === 0
                       ? "linear-gradient(90deg, var(--accent), var(--accent-2))"
-                      : "linear-gradient(90deg, #a5b4fc, #c4b5fd)",
+                      : "linear-gradient(90deg, rgba(165,180,252,0.55), rgba(196,181,253,0.55))",
                 }}
               />
             </div>

@@ -232,7 +232,7 @@ export default function Live() {
             Start camera
           </button>
         )}
-        {status === "loading" && <p className="flex items-center gap-2 text-sm text-[var(--muted)]"><span className="spinner !border-indigo-200 !border-t-indigo-500" />Loading hand and pose models...</p>}
+        {status === "loading" && <p className="flex items-center gap-2 text-sm text-[var(--muted)]"><span className="spinner !border-indigo-300/30 !border-t-indigo-300" />Loading hand and pose models...</p>}
         {status === "running" && (
           <>
             <div className="flex gap-2">
@@ -259,14 +259,14 @@ export default function Live() {
             </button>
           </>
         )}
-        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
+        {error && <p className="rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-300">{error}</p>}
       </div>
 
       <div>
         {result ? (
           <Results top5={result.top5} />
         ) : (
-          <p className="grid h-full min-h-40 place-items-center rounded-2xl bg-white/40 p-6 text-center text-sm text-[var(--muted)]">
+          <p className="grid h-full min-h-40 place-items-center rounded-2xl bg-[var(--surface)] p-6 text-center text-sm text-[var(--muted)]">
             {status === "running"
               ? mode === "record"
                 ? "Press Start recording, make one sign, then press Stop and predict."

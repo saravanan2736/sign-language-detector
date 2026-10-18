@@ -24,10 +24,10 @@ export default function History() {
       <button onClick={load} className="btn btn-ghost">
         Refresh
       </button>
-      {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
+      {error && <p className="rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-300">{error}</p>}
       {rows && rows.length === 0 && <p className="text-sm text-[var(--muted)]">No predictions yet.</p>}
       {rows && rows.length > 0 && (
-        <div className="overflow-hidden rounded-2xl bg-white/50">
+        <div className="overflow-hidden rounded-2xl bg-[var(--surface)]">
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-[var(--muted)]">
               <tr>
@@ -41,7 +41,7 @@ export default function History() {
               {rows.map((r, i) => (
                 <tr
                   key={r.id}
-                  className="fade-up border-t border-white/70 transition-colors hover:bg-white/70"
+                  className="fade-up border-t border-[var(--line)] transition-colors hover:bg-[var(--surface-hover)]"
                   style={{ animationDelay: `${i * 25}ms` }}
                 >
                   <td className="px-4 py-2.5 tabular-nums text-[var(--muted)]">{r.id}</td>
