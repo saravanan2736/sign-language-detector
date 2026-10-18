@@ -10,6 +10,11 @@ export default function Results({ top5 }: { top5: Guess[] }) {
         <p className="mt-1 text-4xl font-semibold uppercase tracking-tight">{best.word}</p>
         <p className="mt-1 text-sm text-white/80">{(best.score * 100).toFixed(1)}% confidence</p>
       </div>
+      {best.score < 0.4 && (
+        <p className="rounded-xl bg-amber-400/15 px-3 py-2 text-sm text-amber-200">
+          Low confidence. The right word may be one of the other guesses below.
+        </p>
+      )}
       <ul className="space-y-3">
         {top5.map((g, i) => (
           <li key={g.word + i} className="text-sm">

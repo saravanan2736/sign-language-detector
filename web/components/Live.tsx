@@ -38,10 +38,14 @@ export default function Live() {
   const modeRef = useRef<Mode>("record");
   const lastInferRef = useRef(0);
   const inflightRef = useRef(false);
+  const handsInTakeRef = useRef(false);
+  const noHandFramesRef = useRef(0);
+  const countdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [status, setStatus] = useState<"idle" | "loading" | "running">("idle");
   const [mode, setMode] = useState<Mode>("record");
   const [recording, setRecording] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [handsSeen, setHandsSeen] = useState(false);
   const [result, setResult] = useState<Prediction | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,14 +71,18 @@ export default function Live() {
     if (!recordingRef.current) return;
     recordingRef.current = false;
     setRecording(false);
-    const take = takeRef.current;
+    let take = takeRef.current;
     takeRef.current = [];
+    // drop the idle frames after the hands left the picture
+    if (noHandFramesRef.current > 0) take = take.slice(0, Math.max(10, take.length - noHandFramesRef.current));
     if (take.length < 10) setError("Too short. Record the whole sign (about 1 to 3 seconds).");
     else infer(take);
   }, [infer]);
 
   const stop = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
+    if (countdownTimerRef.current) clearTimeout(countdownTimerRef.current);
+    setCountdown(null);
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     poseRef.current?.close();
@@ -171,7 +179,14 @@ export default function Live() {
 
           if (recordingRef.current) {
             takeRef.current.push(skel);
-            if (takeRef.current.length >= MAX_RECORD_FRAMES) stopRecording();
+            if (hands.length > 0) {
+              handsInTakeRef.current = true;
+              noHandFramesRef.current = 0;
+            } else if (handsInTakeRef.current) {
+              noHandFramesRef.current += 1;
+            }
+            // auto-stop shortly after the hands drop out of view
+            if (noHandFramesRef.current >= 15 || takeRef.current.length >= MAX_RECORD_FRAMES) stopRecording();
           } else if (
             modeRef.current === "continuous" &&
             buf.length === WINDOW &&
@@ -195,13 +210,33 @@ export default function Live() {
     }
   }
 
-  function toggleRecord() {
-    if (recordingRef.current) return stopRecording();
+  function beginTake() {
     takeRef.current = [];
+    handsInTakeRef.current = false;
+    noHandFramesRef.current = 0;
     recordingRef.current = true;
     setRecording(true);
+  }
+
+  function toggleRecord() {
+    if (recordingRef.current) return stopRecording();
+    if (countdownTimerRef.current) {
+      clearTimeout(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+      return setCountdown(null);
+    }
     setResult(null);
     setError(null);
+    const tick = (n: number) => {
+      if (n === 0) {
+        countdownTimerRef.current = null;
+        setCountdown(null);
+        return beginTake();
+      }
+      setCountdown(n);
+      countdownTimerRef.current = setTimeout(() => tick(n - 1), 1000);
+    };
+    tick(3);
   }
 
   return (
@@ -219,6 +254,19 @@ export default function Live() {
             <span className="rec-pulse absolute left-2 top-2 rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-medium text-white">
               REC
             </span>
+          )}
+          {countdown !== null && (
+            <div className="absolute inset-0 grid place-items-center bg-black/35">
+              <span key={countdown} className="fade-up text-8xl font-bold text-white drop-shadow-lg">
+                {countdown}
+              </span>
+            </div>
+          )}
+          {result && status === "running" && (
+            <div className="absolute inset-x-2 bottom-9 rounded-xl bg-black/55 px-3 py-2 text-center backdrop-blur">
+              <span className="text-2xl font-semibold uppercase text-white">{result.predicted_word}</span>
+              <span className="ml-2 text-sm text-white/70">{(result.score * 100).toFixed(0)}%</span>
+            </div>
           )}
           {status === "running" && (
             <span className="absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-0.5 text-xs text-white backdrop-blur">
@@ -251,7 +299,7 @@ export default function Live() {
                 onClick={toggleRecord}
                 className={`btn w-full ${recording ? "btn-danger rec-pulse" : "btn-primary"}`}
               >
-                {recording ? "Stop and predict" : "Start recording"}
+                {recording ? "Stop and predict" : countdown !== null ? `Starting in ${countdown}... (cancel)` : "Start recording"}
               </button>
             )}
             <button onClick={stop} className="btn btn-ghost w-full">
@@ -269,7 +317,7 @@ export default function Live() {
           <p className="grid h-full min-h-40 place-items-center rounded-2xl bg-[var(--surface)] p-6 text-center text-sm text-[var(--muted)]">
             {status === "running"
               ? mode === "record"
-                ? "Press Start recording, make one sign, then press Stop and predict."
+                ? "Press Start recording. After a 3-2-1 countdown, make one sign. It stops by itself when your hands leave the picture."
                 : "Sign in front of the camera. Predictions update about once a second."
               : "Start the camera to begin."}
           </p>
