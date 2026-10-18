@@ -74,3 +74,15 @@ Now you can upload video clips in the browser and the app will predict the signs
 
 ## Evaluation
 Run `python evaluate.py`. Current skeleton-only model on WLASL-100: test top-1 17.2%, top-5 42.0%, macro-F1 0.14 (see `docs/eval_results.json`). Retrain with `python ml_pipeline/src/train.py` (run from the project root; needs `data/processed`). Tests: `pytest tests`.
+
+## Next.js web UI (upload, live webcam, history)
+A React/Next.js frontend lives in `web/` (upload video, live webcam with in-browser MediaPipe, prediction history).
+It talks to the FastAPI backend (CORS is enabled for `http://localhost:3000`).
+```bash
+# terminal 1 (venv active)
+cd backend && python main.py
+# terminal 2
+cd web && npm install && npm run dev      # then open http://localhost:3000
+```
+In the Live webcam tab use **Record a sign** (press start, sign once, press stop). It matches how the model was trained better than **Continuous**.
+The Streamlit app in `frontend/` still works too.

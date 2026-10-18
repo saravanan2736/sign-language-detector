@@ -1,6 +1,9 @@
 import sys
 import os
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import numpy as np
 from sqlalchemy.orm import Session
 import uvicorn
 
@@ -35,6 +38,14 @@ app = FastAPI(
     description="Backend service for recognizing sign language from video clips",
     version="0.1.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 def read_root():
@@ -96,6 +107,29 @@ async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_
         "model_version": version,
         "record_id": history_record.id
     }
+
+class SkeletonRequest(BaseModel):
+    # 64 frames x 75 joints x (x, y, z): 33 pose + 21 left hand + 21 right hand
+    skeleton: list[list[list[float]]]
+
+
+@app.post("/predict_skeleton")
+def predict_skeleton(req: SkeletonRequest):
+    arr = np.array(req.skeleton, dtype=np.float32)
+    if arr.ndim != 3 or arr.shape[1:] != (75, 3) or not 8 <= arr.shape[0] <= 300:
+        raise HTTPException(status_code=422, detail="skeleton must be (frames, 75, 3)")
+    if arr.shape[0] != 64:  # resample to the 64 frames the model expects
+        arr = arr[np.linspace(0, arr.shape[0] - 1, 64).astype(int)]
+    if not arr.any():
+        raise HTTPException(status_code=422, detail="No person/hands detected")
+    x = torch.from_numpy(arr).unsqueeze(0).to(device)
+    with torch.no_grad():
+        probs = F.softmax(model(None, x), dim=1)[0]
+    top_p, top_i = torch.topk(probs, min(5, len(probs)))
+    top5 = [{"word": index_to_word.get(int(i), f"WordClass_{int(i)}"), "score": float(v)}
+            for v, i in zip(top_p, top_i)]
+    return {"predicted_word": top5[0]["word"], "score": top5[0]["score"], "top5": top5}
+
 
 @app.get("/history")
 def get_history(limit: int = 20, db: Session = Depends(get_db)):
