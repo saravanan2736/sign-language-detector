@@ -1,43 +1,52 @@
 import type { Guess } from "@/lib/api";
+import { WORDS } from "@/lib/words";
+
+export function EmptyResult({ message }: { message: string }) {
+  return (
+    <div className="space-y-5">
+      <p className="text-[var(--muted)]">{message}</p>
+      <div>
+        <p className="label mb-2">Supported words</p>
+        <p className="text-[var(--text)]">{WORDS.join(", ")}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Results({ top5 }: { top5: Guess[] }) {
   if (!top5.length) return null;
   const best = top5[0];
   return (
-    <div className="fade-up space-y-5" key={best.word + best.score}>
-      <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] p-5 text-white shadow-lg shadow-indigo-500/30">
-        <p className="text-xs uppercase tracking-wide text-white/75">Best guess</p>
-        <p className="mt-1 text-4xl font-semibold uppercase tracking-tight">{best.word}</p>
-        <p className="mt-1 text-sm text-white/80">{(best.score * 100).toFixed(1)}% confidence</p>
+    <div className="space-y-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="label">Predicted word</p>
+          <p className="text-3xl font-semibold capitalize leading-tight">{best.word}</p>
+        </div>
+        <div className="text-right">
+          <p className="label">Confidence</p>
+          <p className="text-2xl font-semibold tabular-nums leading-tight">{(best.score * 100).toFixed(1)}%</p>
+        </div>
       </div>
+
       {best.score < 0.4 && (
-        <p className="rounded-xl bg-amber-400/15 px-3 py-2 text-sm text-amber-200">
-          Low confidence. The right word may be one of the other guesses below.
-        </p>
+        <p className="alert alert-warning">Low confidence. The correct word may be one of the other predictions.</p>
       )}
-      <ul className="space-y-3">
-        {top5.map((g, i) => (
-          <li key={g.word + i} className="text-sm">
-            <div className="mb-1 flex justify-between">
-              <span className="font-medium uppercase">{g.word}</span>
-              <span className="tabular-nums text-[var(--muted)]">{(g.score * 100).toFixed(1)}%</span>
-            </div>
-            <div className="bar-track">
-              <div
-                className="bar-fill"
-                style={{
-                  width: `${Math.max(2, g.score * 100)}%`,
-                  animationDelay: `${i * 70}ms`,
-                  background:
-                    i === 0
-                      ? "linear-gradient(90deg, var(--accent), var(--accent-2))"
-                      : "linear-gradient(90deg, rgba(165,180,252,0.55), rgba(196,181,253,0.55))",
-                }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+
+      <div>
+        <p className="label mb-3">Top 5 predictions</p>
+        <ul className="space-y-3">
+          {top5.map((g, i) => (
+            <li key={g.word + i} className="grid grid-cols-[5.5rem_1fr_3.5rem] items-center gap-3">
+              <span className="truncate capitalize">{g.word}</span>
+              <div className="bar-track">
+                <div className={`bar-fill ${i === 0 ? "top" : ""}`} style={{ width: `${Math.max(1, g.score * 100)}%` }} />
+              </div>
+              <span className="text-right tabular-nums text-[var(--muted)]">{(g.score * 100).toFixed(1)}%</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

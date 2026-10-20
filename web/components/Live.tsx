@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { HandLandmarker, PoseLandmarker } from "@mediapipe/tasks-vision";
 import { predictSkeleton, type Prediction } from "@/lib/api";
-import Results from "./Results";
+import Results, { EmptyResult } from "./Results";
 
 const WINDOW = 64;
 const MAX_RECORD_FRAMES = 150;
@@ -162,12 +162,12 @@ export default function Live() {
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           for (const lm of h.landmarks) {
-            drawer.drawConnectors(lm, HandLandmarker.HAND_CONNECTIONS, { color: "#10b981", lineWidth: 3 });
+            drawer.drawConnectors(lm, HandLandmarker.HAND_CONNECTIONS, { color: "#58a6ff", lineWidth: 3 });
             drawer.drawLandmarks(lm, { color: "#ffffff", radius: 2 });
           }
           if (p.landmarks[0]) {
             drawer.drawConnectors(p.landmarks[0], PoseLandmarker.POSE_CONNECTIONS, {
-              color: "#60a5fa",
+              color: "#8b949e",
               lineWidth: 2,
             });
           }
@@ -239,90 +239,91 @@ export default function Live() {
     tick(3);
   }
 
+  const hint =
+    status !== "running"
+      ? "Start the camera to begin."
+      : mode === "record"
+        ? "Press Start recording. After a 3 second countdown, make one sign. Recording stops when your hands leave the picture."
+        : "Sign in front of the camera. The prediction updates about once a second.";
+
   return (
-    <div className="grid gap-8 md:grid-cols-[minmax(0,320px)_1fr]">
-      <div className="space-y-3">
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg">
-          <video
-            ref={videoRef}
-            playsInline
-            muted
-            className="absolute inset-0 h-full w-full -scale-x-100 object-cover"
-          />
-          <canvas ref={canvasRef} className="absolute inset-0 h-full w-full -scale-x-100 object-cover" />
-          {recording && (
-            <span className="rec-pulse absolute left-2 top-2 rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-medium text-white">
-              REC
-            </span>
-          )}
-          {countdown !== null && (
-            <div className="absolute inset-0 grid place-items-center bg-black/35">
-              <span key={countdown} className="fade-up text-8xl font-bold text-white drop-shadow-lg">
-                {countdown}
-              </span>
-            </div>
-          )}
-          {result && status === "running" && (
-            <div className="absolute inset-x-2 bottom-9 rounded-xl bg-black/55 px-3 py-2 text-center backdrop-blur">
-              <span className="text-2xl font-semibold uppercase text-white">{result.predicted_word}</span>
-              <span className="ml-2 text-sm text-white/70">{(result.score * 100).toFixed(0)}%</span>
-            </div>
-          )}
+    <div className="grid gap-6 lg:grid-cols-2">
+      <section className="card">
+        <div className="card-header">
+          <h2 className="card-title">Camera</h2>
           {status === "running" && (
-            <span className="absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-0.5 text-xs text-white backdrop-blur">
-              {handsSeen ? "Hands detected" : "No hands in view"}
+            <span className={`text-[13px] ${recording ? "text-[var(--danger)]" : "text-[var(--muted)]"}`}>
+              {recording ? "Recording" : handsSeen ? "Hands detected" : "No hands in view"}
             </span>
           )}
         </div>
-
-        {status === "idle" && (
-          <button onClick={start} className="btn btn-primary w-full">
-            Start camera
-          </button>
-        )}
-        {status === "loading" && <p className="flex items-center gap-2 text-sm text-[var(--muted)]"><span className="spinner !border-indigo-300/30 !border-t-indigo-300" />Loading hand and pose models...</p>}
-        {status === "running" && (
-          <>
-            <div className="flex gap-2">
-              {(["record", "continuous"] as Mode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`btn flex-1 ${mode === m ? "btn-active" : "btn-ghost"}`}
-                >
-                  {m === "record" ? "Record a sign" : "Continuous"}
-                </button>
-              ))}
-            </div>
-            {mode === "record" && (
-              <button
-                onClick={toggleRecord}
-                className={`btn w-full ${recording ? "btn-danger rec-pulse" : "btn-primary"}`}
-              >
-                {recording ? "Stop and predict" : countdown !== null ? `Starting in ${countdown}... (cancel)` : "Start recording"}
-              </button>
+        <div className="card-body space-y-4">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black">
+            <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full -scale-x-100 object-cover" />
+            <canvas ref={canvasRef} className="absolute inset-0 h-full w-full -scale-x-100 object-cover" />
+            {status !== "running" && (
+              <div className="absolute inset-0 grid place-items-center text-[13px] text-neutral-400">
+                {status === "loading" ? "Loading hand and pose models..." : "Camera is off"}
+              </div>
             )}
-            <button onClick={stop} className="btn btn-ghost w-full">
-              Stop camera
-            </button>
-          </>
-        )}
-        {error && <p className="rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-300">{error}</p>}
-      </div>
+            {countdown !== null && (
+              <div className="absolute inset-0 grid place-items-center bg-black/50">
+                <span className="text-7xl font-semibold text-white">{countdown}</span>
+              </div>
+            )}
+            {result && status === "running" && (
+              <div className="absolute inset-x-3 bottom-3 rounded-md bg-black/75 px-3 py-2 text-white">
+                <span className="text-lg font-semibold capitalize">{result.predicted_word}</span>
+                <span className="ml-2 text-[13px] text-neutral-300">{(result.score * 100).toFixed(0)}%</span>
+              </div>
+            )}
+          </div>
 
-      <div>
-        {result ? (
-          <Results top5={result.top5} />
-        ) : (
-          <p className="grid h-full min-h-40 place-items-center rounded-2xl bg-[var(--surface)] p-6 text-center text-sm text-[var(--muted)]">
-            {status === "running"
-              ? mode === "record"
-                ? "Press Start recording. After a 3-2-1 countdown, make one sign. It stops by itself when your hands leave the picture."
-                : "Sign in front of the camera. Predictions update about once a second."
-              : "Start the camera to begin."}
-          </p>
-        )}
-      </div>
+          {status === "idle" && (
+            <button onClick={start} className="btn btn-primary btn-block">
+              Start camera
+            </button>
+          )}
+          {status === "loading" && (
+            <button disabled className="btn btn-secondary btn-block">
+              <span className="spinner" />
+              Loading
+            </button>
+          )}
+          {status === "running" && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                {(["record", "continuous"] as Mode[]).map((m) => (
+                  <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m} className="chip !h-9 !text-sm">
+                    {m === "record" ? "Record a sign" : "Continuous"}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {mode === "record" ? (
+                  <button onClick={toggleRecord} className={`btn ${recording ? "btn-danger" : "btn-primary"}`}>
+                    {recording ? "Stop and predict" : countdown !== null ? "Cancel" : "Start recording"}
+                  </button>
+                ) : (
+                  <span />
+                )}
+                <button onClick={stop} className="btn btn-secondary">
+                  Stop camera
+                </button>
+              </div>
+            </div>
+          )}
+
+          {error && <p className="alert alert-danger">{error}</p>}
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="card-header">
+          <h2 className="card-title">Result</h2>
+        </div>
+        <div className="card-body">{result ? <Results top5={result.top5} /> : <EmptyResult message={hint} />}</div>
+      </section>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { predictVideo, type Prediction } from "@/lib/api";
-import Results from "./Results";
+import Results, { EmptyResult } from "./Results";
 
 // strongest demo clips first
 const SAMPLES = ["need", "drink", "no", "what", "mother", "help", "want", "eat", "go", "yes", "like", "who"];
@@ -53,72 +53,80 @@ export default function Upload() {
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="space-y-4">
-        <label
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            const f = e.dataTransfer.files?.[0];
-            if (f && f.type.startsWith("video/")) choose(f);
-            else setError("Please drop a video file.");
-          }}
-          className={`block cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center text-sm transition-all duration-200 ${
-            dragging
-              ? "scale-[1.02] border-indigo-300 bg-indigo-400/15 text-white"
-              : "border-indigo-300/30 bg-[var(--surface)] text-[var(--muted)] hover:border-indigo-300/70 hover:bg-[var(--surface-hover)]"
-          }`}
-        >
-          <input type="file" accept="video/*" onChange={(e) => choose(e.target.files?.[0] ?? null)} className="sr-only" />
-          <svg viewBox="0 0 24 24" className={`mx-auto mb-2 h-8 w-8 transition-transform ${dragging ? "-translate-y-1" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 16V4m0 0L7 9m5-5 5 5" />
-            <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
-          </svg>
-          <p className="font-medium text-[var(--ink)]">{file ? file.name : "Drop a video here, or click to browse"}</p>
-          <p className="mt-1 text-xs">One short clip of a single sign (mp4, mov, webm)</p>
-        </label>
-
-        <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">Or try a sample clip</p>
-          <div className="flex flex-wrap gap-1.5">
-            {SAMPLES.map((w) => (
-              <button
-                key={w}
-                onClick={() => useSample(w)}
-                disabled={busy}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 ${
-                  file?.name === `${w}.mp4`
-                    ? "bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-white"
-                    : "bg-[var(--surface-hover)] text-[var(--ink)] hover:bg-white/20"
-                }`}
-              >
-                {w}
-              </button>
-            ))}
-          </div>
+    <div className="grid gap-6 lg:grid-cols-2">
+      <section className="card">
+        <div className="card-header">
+          <h2 className="card-title">Input</h2>
         </div>
+        <div className="card-body space-y-5">
+          <label
+            className="dropzone"
+            data-dragging={dragging}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f && f.type.startsWith("video/")) choose(f);
+              else setError("Please drop a video file.");
+            }}
+          >
+            <input type="file" accept="video/*" onChange={(e) => choose(e.target.files?.[0] ?? null)} className="sr-only" />
+            <span className="block font-medium text-[var(--text)]">{file ? file.name : "Choose a video or drop it here"}</span>
+            <span className="mt-1 block text-[13px]">One short clip of a single sign. MP4, MOV or WebM.</span>
+          </label>
 
-        {url && <video src={url} controls className="max-h-72 w-full rounded-2xl bg-black shadow-md" />}
-        <button onClick={() => run()} disabled={!file || busy} className="btn btn-primary">
-          {busy && <span className="spinner" />}
-          {busy ? "Analysing..." : "Predict sign"}
-        </button>
-        {error && <p className="rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-300">{error}</p>}
-      </div>
-      <div>
-        {result ? (
-          <Results top5={result.top5} />
-        ) : (
-          <div className="grid h-full min-h-40 place-items-center rounded-2xl bg-[var(--surface)] p-6 text-center text-sm text-[var(--muted)]">
-            {busy ? "Analysing the clip..." : "Results will appear here"}
+          <div>
+            <p className="label mb-2">Sample clips</p>
+            <div className="flex flex-wrap gap-2">
+              {SAMPLES.map((w) => (
+                <button
+                  key={w}
+                  onClick={() => useSample(w)}
+                  disabled={busy}
+                  aria-pressed={file?.name === `${w}.mp4`}
+                  className="chip capitalize"
+                >
+                  {w}
+                </button>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+
+          {url && <video src={url} controls className="aspect-video w-full rounded-lg bg-black" />}
+
+          <div className="flex items-center gap-3">
+            <button onClick={() => run()} disabled={!file || busy} className="btn btn-primary">
+              {busy && <span className="spinner" />}
+              {busy ? "Analysing" : "Predict sign"}
+            </button>
+            {file && !busy && (
+              <button onClick={() => choose(null)} className="btn btn-secondary">
+                Clear
+              </button>
+            )}
+          </div>
+
+          {error && <p className="alert alert-danger">{error}</p>}
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="card-header">
+          <h2 className="card-title">Result</h2>
+        </div>
+        <div className="card-body">
+          {result ? (
+            <Results top5={result.top5} />
+          ) : (
+            <EmptyResult message={busy ? "Analysing the clip..." : "Upload a clip or pick a sample to see a prediction."} />
+          )}
+        </div>
+      </section>
     </div>
   );
 }
