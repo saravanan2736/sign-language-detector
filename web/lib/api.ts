@@ -1,7 +1,7 @@
 export const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export type Guess = { word: string; score: number };
-export type Prediction = { predicted_word: string; score: number; top5: Guess[] };
+export type Prediction = { predicted_word: string; score: number; top5: Guess[]; skeleton?: number[][][] };
 export type HistoryRow = {
   id: number;
   predicted_word: string;

@@ -48,7 +48,10 @@ export default function Live() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [handsSeen, setHandsSeen] = useState(false);
   const [result, setResult] = useState<Prediction | null>(null);
+  const [replay, setReplay] = useState<number[][][] | null>(null);
+  const [timeline, setTimeline] = useState<{ id: number; word: string; score: number }[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const toggleRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     modeRef.current = mode;
@@ -58,7 +61,10 @@ export default function Live() {
     if (inflightRef.current) return;
     inflightRef.current = true;
     try {
-      setResult(await predictSkeleton(frames));
+      const r = await predictSkeleton(frames);
+      setResult(r);
+      setReplay(frames);
+      setTimeline((t) => [{ id: Date.now(), word: r.predicted_word, score: r.score }, ...t].slice(0, 8));
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Prediction failed");
@@ -96,6 +102,20 @@ export default function Live() {
   }, []);
 
   useEffect(() => stop, [stop]);
+
+  // Space starts / stops a recording when nothing else has focus
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== "Space" || e.repeat) return;
+      const el = document.activeElement;
+      if (el && el !== document.body) return;
+      if (status !== "running" || modeRef.current !== "record") return;
+      e.preventDefault();
+      toggleRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [status]);
 
   async function start() {
     setStatus("loading");
@@ -239,6 +259,8 @@ export default function Live() {
     tick(3);
   }
 
+  toggleRef.current = toggleRecord;
+
   const hint =
     status !== "running"
       ? "Start the camera to begin."
@@ -314,7 +336,12 @@ export default function Live() {
             </div>
           )}
 
-          {error && <p className="alert alert-danger">{error}</p>}
+          {status === "running" && mode === "record" && (
+            <p className="text-[13px] text-[var(--muted)]">
+              Shortcut: press <kbd>Space</kbd> to start or stop recording.
+            </p>
+          )}
+          {error && <p className="alert alert-danger reveal-block">{error}</p>}
         </div>
       </section>
 
@@ -322,7 +349,31 @@ export default function Live() {
         <div className="card-header">
           <h2 className="card-title">Result</h2>
         </div>
-        <div className="card-body">{result ? <Results top5={result.top5} /> : <EmptyResult message={hint} />}</div>
+        <div className="card-body space-y-6">
+          {result ? (
+            <Results top5={result.top5} skeleton={mode === "record" ? (replay ?? undefined) : undefined} aspect={4 / 3} mirror />
+          ) : (
+            <EmptyResult message={hint} />
+          )}
+          {timeline.length > 0 && (
+            <div>
+              <p className="label mb-2">Recent predictions</p>
+              <div className="flex flex-wrap gap-2">
+                {timeline.map((t, i) => (
+                  <span
+                    key={t.id}
+                    className={`timeline-tile rounded-md border px-2.5 py-1 text-[13px] ${
+                      i === 0 ? "border-[var(--primary-text)] text-[var(--primary-text)]" : "border-[var(--border)] text-[var(--muted)]"
+                    }`}
+                  >
+                    <span className="capitalize">{t.word}</span>
+                    <span className="ml-1.5 tabular-nums opacity-70">{(t.score * 100).toFixed(0)}%</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );

@@ -111,7 +111,12 @@ export default function Home() {
           </div>
         </div>
 
-        <nav className="flex gap-1 md:flex-col" aria-label="Main">
+        <nav className="relative flex gap-1 md:flex-col md:gap-1" aria-label="Main">
+          <span
+            aria-hidden
+            className="nav-indicator hidden md:block"
+            style={{ transform: `translateY(${TABS.findIndex((t) => t.id === tab) * 40}px)` }}
+          />
           {TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} aria-current={tab === t.id ? "page" : undefined} className="nav-item">
               {t.icon}
@@ -139,9 +144,11 @@ export default function Home() {
             <h1 className="text-xl font-semibold">{current.title}</h1>
             <p className="mt-1 text-[var(--muted)]">{current.description}</p>
           </header>
-          {tab === "upload" && <Upload />}
-          {tab === "live" && <Live />}
-          {tab === "history" && <History />}
+          <div key={tab} className="page-enter">
+            {tab === "upload" && <Upload />}
+            {tab === "live" && <Live />}
+            {tab === "history" && <History />}
+          </div>
         </div>
       </main>
     </div>

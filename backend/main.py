@@ -104,6 +104,7 @@ async def predict_sign(video: UploadFile = File(...), db: Session = Depends(get_
         "predicted_word": predicted_word,
         "score": confidence,
         "top5": top5,
+        "skeleton": np.round(skeletons_np, 3).tolist(),  # 64 x 75 x 3, for the landmark replay in the UI
         "model_version": version,
         "record_id": history_record.id
     }
