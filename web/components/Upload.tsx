@@ -1,5 +1,17 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
+import {
+  UploadCloud,
+  FileVideo,
+  Sparkles,
+  RotateCcw,
+  AlertCircle,
+  CheckCircle2,
+  Cpu,
+  Layers,
+  ArrowRight,
+} from "lucide-react";
 import { predictVideo, type Prediction } from "@/lib/api";
 import Results, { EmptyResult } from "./Results";
 import SampleGrid from "./SampleGrid";
@@ -27,9 +39,10 @@ export default function Upload() {
     setError(null);
     setResult(null);
     try {
-      setResult(await predictVideo(f));
+      const pred = await predictVideo(f);
+      setResult(pred);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setError(e instanceof Error ? e.message : "Inference service encountered an error.");
     } finally {
       setBusy(false);
     }
@@ -43,43 +56,110 @@ export default function Upload() {
 
   async function useSample(word: string) {
     try {
-      const blob = await (await fetch(`/samples/${word}.mp4`)).blob();
+      const response = await fetch(`/samples/${word}.mp4`);
+      if (!response.ok) throw new Error("Sample file not found");
+      const blob = await response.blob();
       const f = new File([blob], `${word}.mp4`, { type: "video/mp4" });
       choose(f);
       topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       run(f);
     } catch {
-      setError("Could not load the sample clip.");
+      setError("Could not load the selected sample clip.");
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div ref={topRef} className="grid scroll-mt-6 gap-6 lg:grid-cols-2">
-        <section className="card">
+    <div className="space-y-8">
+      {/* ================= WORKSPACE STAGE: INPUT & RESULTS ================= */}
+      <div ref={topRef} className="grid scroll-mt-24 gap-6 lg:grid-cols-2">
+        
+        {/* INPUT PANEL */}
+        <section className="card flex flex-col">
           <div className="card-header">
-            <h2 className="card-title">Input</h2>
-            {file && <span className="max-w-[60%] truncate text-[13px] text-[var(--muted)]">{file.name}</span>}
-          </div>
-          <div className="card-body space-y-4">
-            {url ? (
-              <video
-                key={url}
-                src={url}
-                controls
-                loop
-                autoPlay
-                muted
-                playsInline
-                onLoadedMetadata={(e) => {
-                  const v = e.currentTarget;
-                  if (v.videoWidth && v.videoHeight) setAspect(v.videoWidth / v.videoHeight);
-                }}
-                className="reveal-block aspect-video w-full rounded-lg bg-black"
-              />
+            <div className="flex items-center gap-2">
+              <FileVideo className="h-4 w-4 text-sky-400" />
+              <h2 className="card-title">Video Input Source</h2>
+            </div>
+            {file ? (
+              <span className="flex items-center gap-1.5 rounded-full border border-sky-400/20 bg-sky-950/30 px-2.5 py-0.5 text-xs font-mono text-sky-300">
+                <CheckCircle2 className="h-3 w-3 text-sky-400" />
+                <span className="max-w-[140px] truncate sm:max-w-[200px]">{file.name}</span>
+              </span>
             ) : (
+              <span className="text-xs text-[var(--muted)]">Awaiting clip</span>
+            )}
+          </div>
+
+          <div className="card-body flex-1 flex flex-col justify-between space-y-4">
+            {url ? (
+              <div className="space-y-4">
+                {/* Active Video Player Viewport */}
+                <div className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-black shadow-md">
+                  <video
+                    key={url}
+                    src={url}
+                    controls
+                    loop
+                    autoPlay
+                    muted
+                    playsInline
+                    onLoadedMetadata={(e) => {
+                      const v = e.currentTarget;
+                      if (v.videoWidth && v.videoHeight) {
+                        setAspect(v.videoWidth / v.videoHeight);
+                      }
+                    }}
+                    className="aspect-video w-full object-contain bg-black"
+                  />
+                  {/* Overlay File Badge */}
+                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-md bg-black/70 px-2 py-1 text-[11px] font-mono text-slate-300 backdrop-blur-md">
+                    <FileVideo className="h-3 w-3 text-sky-400" />
+                    <span className="truncate max-w-[180px]">{file?.name}</span>
+                  </div>
+                </div>
+
+                {/* Video Controls Action Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => run()}
+                      disabled={!file || busy}
+                      className="btn btn-primary"
+                    >
+                      {busy ? (
+                        <>
+                          <span className="spinner" />
+                          <span>Extracting & Classifying...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4" />
+                          <span>Run Sign Detection</span>
+                        </>
+                      )}
+                    </button>
+
+                    {!busy && (
+                      <button
+                        onClick={() => choose(null)}
+                        className="btn btn-secondary"
+                        title="Remove clip"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Clear</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <span className="text-xs text-[var(--muted)]">
+                    {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : ""}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Drag-and-Drop Area */
               <label
-                className="dropzone"
+                className="dropzone group relative flex min-h-[260px] flex-col items-center justify-center p-8 cursor-pointer rounded-xl border-2 border-dashed border-[var(--border-strong)] bg-[var(--surface-2)]/20 hover:border-sky-400/50 hover:bg-sky-950/10 transition-all duration-200"
                 data-dragging={dragging}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -91,64 +171,129 @@ export default function Upload() {
                   setDragging(false);
                   const f = e.dataTransfer.files?.[0];
                   if (f && f.type.startsWith("video/")) choose(f);
-                  else setError("Please drop a video file.");
+                  else setError("Please drop a valid video file (.mp4, .mov, or .webm).");
                 }}
               >
-                <input type="file" accept="video/*" onChange={(e) => choose(e.target.files?.[0] ?? null)} className="sr-only" />
-                <svg viewBox="0 0 24 24" className="dropzone-icon mx-auto mb-3 h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M12 16V4m0 0L7 9m5-5 5 5" />
-                  <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
-                </svg>
-                <span className="block font-medium text-[var(--text)]">Choose a video or drop it here</span>
-                <span className="mt-1 block text-[13px]">One short clip of a single sign. MP4, MOV or WebM.</span>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => choose(e.target.files?.[0] ?? null)}
+                  className="sr-only"
+                />
+
+                <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] text-sky-400 shadow-sm group-hover:scale-110 group-hover:border-sky-400/50 group-hover:shadow-[0_0_20px_-3px_rgba(56,189,248,0.3)] transition-all duration-200">
+                  <UploadCloud className="h-7 w-7" />
+                </div>
+
+                <p className="text-base font-semibold text-[var(--text)] group-hover:text-sky-300 transition-colors">
+                  Upload video or drag & drop
+                </p>
+                <p className="mt-1 text-xs text-[var(--muted)] text-center max-w-xs">
+                  Record or drop a clip of a single American Sign Language word
+                </p>
+
+                {/* Formats Pills */}
+                <div className="mt-4 flex items-center gap-1.5">
+                  {["MP4", "MOV", "WEBM"].map((fmt) => (
+                    <span
+                      key={fmt}
+                      className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-[10px] font-mono font-medium text-[var(--muted)]"
+                    >
+                      {fmt}
+                    </span>
+                  ))}
+                </div>
               </label>
             )}
 
-            <div className="flex items-center gap-3">
-              <button onClick={() => run()} disabled={!file || busy} className="btn btn-primary">
-                {busy && <span className="spinner" />}
-                {busy ? "Analysing" : "Predict sign"}
-              </button>
-              {file && !busy && (
-                <button onClick={() => choose(null)} className="btn btn-secondary">
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {error && <p className="alert alert-danger reveal-block">{error}</p>}
+            {/* Error Banner */}
+            {error && (
+              <div className="alert alert-danger reveal-block flex items-start gap-2.5">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
+                <span className="text-xs">{error}</span>
+              </div>
+            )}
           </div>
         </section>
 
-        <section className="card">
+        {/* RESULTS PANEL */}
+        <section className="card flex flex-col">
           <div className="card-header">
-            <h2 className="card-title">Result</h2>
-            {busy && <span className="text-[13px] text-[var(--muted)]">Extracting landmarks and predicting</span>}
+            <div className="flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-indigo-400" />
+              <h2 className="card-title">Prediction & Pose Inspection</h2>
+            </div>
+            {busy ? (
+              <span className="flex items-center gap-1.5 text-xs text-sky-400 font-medium">
+                <span className="spinner" />
+                Processing
+              </span>
+            ) : result ? (
+              <span className="rounded-full bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                Analysis Complete
+              </span>
+            ) : (
+              <span className="text-xs text-[var(--muted)]">Ready</span>
+            )}
           </div>
-          <div className="card-body">
+
+          <div className="card-body flex-1">
             {result ? (
-              <Results top5={result.top5} skeleton={result.skeleton} aspect={aspect} />
+              <Results
+                top5={result.top5}
+                skeleton={result.skeleton}
+                aspect={aspect}
+              />
             ) : busy ? (
-              <div className="space-y-3" aria-busy>
-                <div className="skeleton h-9 w-40" />
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <div key={i} className="skeleton h-4 w-full" />
-                ))}
+              /* Shimmering High-Tech Loading Skeleton */
+              <div className="space-y-5 py-4" aria-busy>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-[var(--muted)]">
+                    <span>Extracting 75 Pose & Hand Keypoints...</span>
+                    <span className="font-mono text-sky-400">Running</span>
+                  </div>
+                  <div className="skeleton h-10 w-48" />
+                </div>
+
+                <div className="space-y-3 pt-3 border-t border-[var(--border)]">
+                  <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">
+                    Evaluating Class Probabilities
+                  </p>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex justify-between">
+                        <div className="skeleton h-3 w-16" />
+                        <div className="skeleton h-3 w-10" />
+                      </div>
+                      <div className="skeleton h-2 w-full" />
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
-              <EmptyResult message="Upload a clip or pick a sample below to see a prediction." />
+              <EmptyResult message="Upload a recorded gesture clip above, or select one from the vocabulary library below." />
             )}
           </div>
         </section>
       </div>
 
+      {/* ================= SIGN VOCABULARY LIBRARY ================= */}
       <section className="card">
         <div className="card-header">
-          <h2 className="card-title">Sample clips</h2>
-          <span className="text-[13px] text-[var(--muted)]">Hover to preview, click to predict</span>
+          <div className="flex items-center gap-2">
+            <Layers className="h-4 w-4 text-sky-400" />
+            <h2 className="card-title">Pre-Recorded ASL Vocabulary Deck</h2>
+          </div>
+          <span className="text-xs text-[var(--muted)] hidden sm:inline">
+            12 Baseline Evaluated Signs
+          </span>
         </div>
         <div className="card-body">
-          <SampleGrid selected={file?.name.replace(".mp4", "") ?? null} disabled={busy} onPick={useSample} />
+          <SampleGrid
+            selected={file?.name.replace(".mp4", "") ?? null}
+            disabled={busy}
+            onPick={useSample}
+          />
         </div>
       </section>
     </div>

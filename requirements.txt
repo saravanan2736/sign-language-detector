@@ -1,0 +1,20 @@
+# Everything needed to run the project (Python 3.10 - 3.12; tested on 3.11).
+# Install:  pip install -r requirements.txt
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+python-multipart
+requests
+streamlit
+streamlit-webrtc
+torch
+torchvision
+opencv-python
+mediapipe==0.10.14   # newer versions removed the mp.solutions API this project uses
+protobuf>=4.25.3,<5  # required by mediapipe 0.10.14 (pip may warn that streamlit wants newer; it still works)
+numpy
+pandas
+tqdm
+pytest
+httpx

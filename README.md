@@ -17,6 +17,9 @@ This project is an AI-powered Sign Language Detector. It uses a Two-Stream Spati
 * `data/`: Stores dataset metadata, such as the class vocabulary.
 * `checkpoint.pth`: The pre-trained PyTorch model weights.
 
+## Quick start on a new PC
+See [docs/RUN_ON_ANOTHER_PC.md](docs/RUN_ON_ANOTHER_PC.md) for the complete step-by-step guide (Git clone, Python venv, backend, web UI, troubleshooting).
+
 ## Installation & Setup
 
 1. **Clone the repository:**

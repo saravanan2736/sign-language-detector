@@ -13,14 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sign Language Detector",
-  description: "Recognise basic ASL words from video or webcam",
+  title: "SignStudio — AI ASL Sign Language Recognition",
+  description: "Real-time American Sign Language detection and spatial gesture perception powered by ST-GCN + I3D deep learning.",
 };
 
 // Apply the saved theme before first paint so there is no flash.
 const themeScript = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
@@ -31,7 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full bg-[var(--bg)] text-[var(--text)] antialiased selection:bg-sky-500/20 selection:text-sky-300">
+        {children}
+      </body>
     </html>
   );
 }
