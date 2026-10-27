@@ -20,6 +20,8 @@ This project is an AI-powered Sign Language Detector. It uses a Two-Stream Spati
 ## Quick start on a new PC
 See [docs/RUN_ON_ANOTHER_PC.md](docs/RUN_ON_ANOTHER_PC.md) for the complete step-by-step guide (Git clone, Python venv, backend, web UI, troubleshooting).
 
+Short version on Windows: install Git, Python 3.11 and Node.js, clone the repo, then double-click `run.bat` (or run `.un.ps1`). It sets everything up and starts the backend and web UI together.
+
 ## Installation & Setup
 
 1. **Clone the repository:**

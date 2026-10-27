@@ -30,3 +30,4 @@ checkpoints/*
 !checkpoints/demo.pth
 !checkpoints/ens_*.pth
 *.log
+logs/

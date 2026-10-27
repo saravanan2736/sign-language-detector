@@ -23,6 +23,28 @@ git clone https://github.com/saravanan2736/sign-language-detector.git
 cd sign-language-detector
 ```
 
+## Fastest way: one command
+
+After cloning (step 2) and installing the prerequisites (step 1), you can skip steps 3 to 5.
+Double-click **`run.bat`**, or run this in PowerShell from the project folder:
+
+```powershell
+.un.ps1
+```
+
+On the first run it creates the Python environment, installs the Python and web packages (a few minutes),
+starts the backend and the web UI, waits until both respond, and opens http://localhost:3000.
+Press **Q** or **Ctrl+C** in that window to stop both.
+
+| Command | What it does |
+|---|---|
+| `.un.ps1` | start both, open the browser, stop with Q or Ctrl+C |
+| `.un.ps1 -Detach` | start both in the background and return |
+| `.un.ps1 -Stop` | stop servers started with `-Detach` |
+| `.un.ps1 -NoBrowser` | do not open the browser |
+
+Logs are written to the `logs` folder. The manual steps below do the same thing one piece at a time.
+
 ## 3. Create the Python environment and install packages
 
 ```powershell
