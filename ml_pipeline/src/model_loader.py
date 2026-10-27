@@ -1,6 +1,6 @@
 """Loads the inference model.
 
-Priority: ensemble of checkpoints/ens_*.pth (12 demo words) -> single checkpoints/demo.pth
+Priority: ensemble of checkpoints/ens_*.pth (demo words) -> single checkpoints/demo.pth
 -> full 100-word checkpoint.pth. Delete the ens_*.pth files to fall back to the single model.
 """
 import glob

@@ -24,7 +24,7 @@ WLASL, a public ASL dataset. We used the 100-word version: about 1,100 short vid
 - First result: 96% accuracy on training videos but only 8% on new videos. The model had **memorised** the training clips instead of learning the signs. This is called overfitting.
 - Fixes: normalising the points (centre on the shoulders, same scale), adding movement and hand-shape features, random augmentation, dropout, and saving the best model by validation score.
 - Result after fixing: 17% top-1 and 42% top-5 on 100 words. Chance would be 1%.
-- For the demo we trained a smaller model on **12 basic words** (yes, no, eat, drink, like, want, help, need, go, what, who, mother): about 33% top-1 and 67% top-3 on unseen clips. Chance would be about 8%.
+- For the demo we trained a smaller model on **20 basic words** (yes, no, eat, drink, like, want, help, need, go, what, who, mother, woman, man, finish, computer, family, fine, school, work): about 26% top-1 and 61% top-5 on unseen test clips (chance is 5% top-1). Fewer words scores higher: the earlier 12-word version reached about 43% top-1.
 
 ## Honest limits
 - It only knows those words. "Hello", "hi" and "vanakkam" are not in the dataset.

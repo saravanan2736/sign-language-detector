@@ -95,7 +95,7 @@ Open **http://localhost:3000** in Chrome or Edge.
 The first prediction after starting the backend is slow (up to about 20 seconds) while MediaPipe warms up.
 Do one test prediction before showing it to anyone.
 
-The model knows 12 words only: yes, no, eat, drink, like, want, help, need, go, what, who, mother.
+The model knows 20 words only: yes, no, eat, drink, like, want, help, need, go, what, who, mother, woman, man, finish, computer, family, fine, school, work.
 
 ## Optional: the Streamlit version of the UI
 

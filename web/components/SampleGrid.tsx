@@ -5,18 +5,26 @@ import { Play, Check, Film, Sparkles } from "lucide-react";
 
 // strongest demo clips first
 export const SAMPLES = [
-  { word: "need", category: "Action" },
-  { word: "drink", category: "Action" },
-  { word: "no", category: "Basic" },
-  { word: "what", category: "Question" },
+  { word: "family", category: "Entity" },
   { word: "mother", category: "Entity" },
-  { word: "help", category: "Action" },
   { word: "want", category: "Action" },
-  { word: "eat", category: "Action" },
-  { word: "go", category: "Action" },
-  { word: "yes", category: "Basic" },
   { word: "like", category: "Action" },
+  { word: "need", category: "Action" },
+  { word: "go", category: "Action" },
+  { word: "drink", category: "Action" },
+  { word: "what", category: "Question" },
+  { word: "work", category: "Action" },
   { word: "who", category: "Question" },
+  { word: "finish", category: "Action" },
+  { word: "eat", category: "Action" },
+  { word: "yes", category: "Basic" },
+  { word: "computer", category: "Entity" },
+  { word: "man", category: "Entity" },
+  { word: "school", category: "Entity" },
+  { word: "woman", category: "Entity" },
+  { word: "help", category: "Action" },
+  { word: "fine", category: "Basic" },
+  { word: "no", category: "Basic" },
 ] as const;
 
 type Category = "All" | "Action" | "Basic" | "Question" | "Entity";
